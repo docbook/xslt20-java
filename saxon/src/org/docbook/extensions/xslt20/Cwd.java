@@ -22,6 +22,7 @@ package org.docbook.extensions.xslt20;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ExtensionFunctionCall;
 import net.sf.saxon.lib.ExtensionFunctionDefinition;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
@@ -64,12 +65,12 @@ public class Cwd extends ExtensionFunctionDefinition {
     }
 
     private class CwdCall extends ExtensionFunctionCall {
-        public SequenceIterator call(SequenceIterator[] arguments, XPathContext context) throws XPathException {
+        public Sequence call(XPathContext xPathContext, Sequence[] sequences) throws XPathException {
             String dir = System.getProperty("user.dir");
             if (!dir.endsWith("/")) {
                 dir += "/";
             }
-            return SingletonIterator.makeIterator(new AnyURIValue(dir));
+            return new AnyURIValue(dir);
         }
     }
 }

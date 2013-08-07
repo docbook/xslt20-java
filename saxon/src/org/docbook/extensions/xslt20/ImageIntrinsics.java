@@ -39,8 +39,11 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.lib.ExtensionFunctionCall;
 import net.sf.saxon.lib.ExtensionFunctionDefinition;
+import net.sf.saxon.om.AtomicArray;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.trans.XPathException;
@@ -92,8 +95,8 @@ public class ImageIntrinsics extends ExtensionFunctionDefinition {
         int width = -1;
         int depth = -1;
 
-        public SequenceIterator call(SequenceIterator[] arguments, XPathContext context) throws XPathException {
-            String imageFn = ((StringValue) arguments[0].next()).getStringValue();
+        public Sequence call(XPathContext xPathContext, Sequence[] sequences) throws XPathException {
+            String imageFn = ((StringValue) sequences[0].head()).getStringValue();
 
             imageLoaded = false;
             imageFailed = false;
@@ -211,9 +214,9 @@ public class ImageIntrinsics extends ExtensionFunctionDefinition {
 
             if (width >= 0) {
                 Int64Value[] props = { new Int64Value(width), new Int64Value(depth) };
-                return new ArrayIterator(props);
+                return new AtomicArray(props);
             } else {
-                return EmptyIterator.getInstance();
+                return EmptySequence.getInstance();
             }
         }
 

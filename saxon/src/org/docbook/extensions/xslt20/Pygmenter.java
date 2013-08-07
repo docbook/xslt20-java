@@ -27,9 +27,12 @@ import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.lib.ExtensionFunctionCall;
 import net.sf.saxon.lib.ExtensionFunctionDefinition;
+import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.value.Int64Value;
+import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingletonIterator;
@@ -102,16 +105,16 @@ public class Pygmenter extends ExtensionFunctionDefinition {
             ((HighlightCall) dest).staticContext = staticContext;
         }
 
-        public SequenceIterator call(SequenceIterator[] arguments, XPathContext context) throws XPathException {
-            String code = ((StringValue) arguments[0].next()).getStringValue();
+        public Sequence call(XPathContext xPathContext, Sequence[] sequences) throws XPathException {
+            String code = ((StringValue) sequences[0].head()).getStringValue();
             String language = "";
 
-            if (arguments.length > 1) {
-                language = ((StringValue) arguments[1].next()).getStringValue();
+            if (sequences.length > 1) {
+                language = ((StringValue) sequences[1].head()).getStringValue();
             }
 
             if (processor == null) {
-                processor = new Processor(context.getConfiguration());
+                processor = new Processor(xPathContext.getConfiguration());
             }
 
             DocumentBuilder builder = processor.newDocumentBuilder();
@@ -136,7 +139,7 @@ public class Pygmenter extends ExtensionFunctionDefinition {
                 pre = (XdmNode) preIter.next();
             }
 
-            return pre.getUnderlyingNode().iterateAxis(net.sf.saxon.om.Axis.CHILD);
+            return SequenceExtent.makeSequenceExtent(pre.getUnderlyingNode().iterateAxis(AxisInfo.CHILD));
         }
     }
 }
