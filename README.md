@@ -1,4 +1,4 @@
 xslt20-java
 ===========
 
-Java extensions for stylesheet processing
+Java extensions for stylesheet processing.
