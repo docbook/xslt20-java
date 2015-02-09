@@ -31,6 +31,8 @@ import java.awt.image.ImageObserver;
 import java.lang.Thread;
 import java.net.URL;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -43,6 +45,7 @@ import net.sf.saxon.om.AtomicArray;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.StringValue;
@@ -214,7 +217,8 @@ public class ImageIntrinsics extends ExtensionFunctionDefinition {
 
             if (width >= 0) {
                 Int64Value[] props = { new Int64Value(width), new Int64Value(depth) };
-                return new AtomicArray(props);
+                ArrayIterator iter = new ArrayIterator(props);
+                return new AtomicArray(iter);
             } else {
                 return EmptySequence.getInstance();
             }
