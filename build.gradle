@@ -33,6 +33,14 @@ jar {
   }
 }
 
+// Variables
+project.ext.saxonRelease = saxonVersion.substring(0,5)
+project.ext.saxonBranch  = saxonVersion.substring(0,3).replaceAll("\\.", "")
+project.ext.releaseVersion = version
+project.ext.distVersion = version + "-" + saxonBranch
+
+version = project.ext.distVersion // - gets turned into . in some contexts
+
 // I refuse to put my PGP password in a file, so there's no way to
 // make this work from a CI environment.
 gradle.taskGraph.whenReady { taskGraph ->
@@ -119,15 +127,15 @@ uploadArchives {
             }
 
             pom.project {
-               name 'annotations'
+               name 'docbook-xsl-java-saxon'
                packaging 'jar'
-               description 'A set of global, public annotations'
-               url 'https://github.com/ndw/nwalsh-annotations'
+               description 'Saxon extension functions for DocBook'
+               url 'https://github.com/docbook/xslt20-java'
 
                scm {
-                   url 'scm:git@github.com:ndw/nwalsh-annotations.git'
-                   connection 'scm:git@github.com:ndw/nwalsh-annotations.git'
-                   developerConnection 'scm:git@github.com:ndw/nwalsh-annotations.git'
+                   url 'scm:git@github.com:docbook/xslt20-java.git'
+                   connection 'scm:git@github.com:docbook/xslt20-java.git'
+                   developerConnection 'scm:git@github.com:docbook/xslt20-java.git'
                }
 
                licenses {
