@@ -1,0 +1,150 @@
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+}
+
+plugins {
+  id "java"
+  id "maven"
+  id "signing"
+}
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile (
+    //[group: '', name: '', version: ''],
+    [group: 'com.nwalsh', name: 'nwalsh-annotations', version: '1.0.0'],
+    [group: 'net.sf.saxon', name: 'Saxon-HE', version: saxonVersion],
+    [group: 'org.atteo.classindex', name: 'classindex', version: '3.3'],
+    [group: 'org.pygments', name: 'pygments', version: '2.0.1'],
+    [group: 'org.python', name: 'jython-standalone', version: '2.5.2']
+  )
+}
+
+jar {
+  baseName "docbook-xsl-java-saxon"
+  manifest {
+    attributes ("Implementation-Title": "DocBook XSL Extension Functions",
+                "Implementation-Version": version)
+  }
+}
+
+// I refuse to put my PGP password in a file, so there's no way to
+// make this work from a CI environment.
+gradle.taskGraph.whenReady { taskGraph ->
+    if (taskGraph.hasTask(":uploadArchives")) {
+        Console console = System.console()
+        console.printf "\n\nWe have to sign some things in this build." +
+                       "\n\nPlease enter your signing details.\n\n"
+
+        def password = console.readPassword("PGP Private Key Password: ")
+
+        allprojects { ext."signing.password" = password }
+
+        console.printf "\nThanks.\n\n"
+    }
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+  baseName = "docbook-xsl-java-saxon"
+  classifier = 'javadoc'
+  from tasks.javadoc.destinationDir
+}
+
+task sourcesJar(type: Jar) {
+  baseName = "docbook-xsl-java-saxon"
+  classifier = 'sources'
+  from sourceSets.main.allSource
+}
+
+task copyJar(dependsOn: jar, type: Copy) {
+  from "build/libs/docbook-xsl-java-saxon-" + version + ".jar"
+  into "build/dist"
+}
+
+task copyJavaDoc(dependsOn: javadoc, type: Copy) {
+  from "build/docs"
+  into "build/dist/docs"
+}
+
+task copyLicense(dependsOn: copyJavaDoc, type: Copy) {
+  from "LICENSE.md"
+  into "build/dist/docs"
+}
+
+task copyReadme(dependsOn: copyJavaDoc, type: Copy) {
+  from "README.md"
+  into "build/dist/docs"
+}
+
+task copyDocs(dependsOn: [copyLicense, copyReadme]) {
+  // nop
+}
+
+task makeDist(dependsOn: [ build, copyJar, copyDocs ]) << {
+  println "Created distribution in build/dist"
+}
+
+task zipDist(dependsOn: makeDist, type: Zip) {
+  from('build/dist')
+  into 'docbook-xsl-java-saxon-' + version
+  archiveName 'docbook-xsl-java-saxon-' + version + ".zip"
+}
+
+task dist(dependsOn: zipDist) {
+  // nop
+}
+
+artifacts {
+  archives javadocJar
+  archives sourcesJar
+}
+
+signing {
+  required { gradle.taskGraph.hasTask("uploadArchives") }
+  sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+              authentication(userName: sonatypeUsername, password: sonatypePassword)
+            }
+
+            pom.project {
+               name 'annotations'
+               packaging 'jar'
+               description 'A set of global, public annotations'
+               url 'https://github.com/ndw/nwalsh-annotations'
+
+               scm {
+                   url 'scm:git@github.com:ndw/nwalsh-annotations.git'
+                   connection 'scm:git@github.com:ndw/nwalsh-annotations.git'
+                   developerConnection 'scm:git@github.com:ndw/nwalsh-annotations.git'
+               }
+
+               licenses {
+                   license {
+                       name 'The Apache Software License, Version 2.0'
+                       url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                       distribution 'repo'
+                   }
+               }
+
+               developers {
+                   developer {
+                       id 'ndw'
+                       name 'Norman Walsh'
+                   }
+               }
+           }
+        }
+    }
+}
