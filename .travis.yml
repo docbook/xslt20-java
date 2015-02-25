@@ -1,0 +1,15 @@
+language: java
+script: gradle dist
+
+install:
+- echo sonatypeUsername=none >> gradle.properties
+- echo sonatypePassword=none >> gradle.properties
+
+deploy:
+  provider: releases
+  api_key:
+    secure: ETTNZDEWwIVmnugLc8A3yVsOHmkjxguJDv94m+UD3g+4ahzvh61FV2SsAAvkkkE/7/9u4bz41uckaUAm9nSZ11CpWyIglHoJpJKa6oGLDswex+6x1kizCraNgZOq9EAd5+m14nLpLFYA8XlpI01T1smeFXAoVKogtRvGRLfmcok=
+  file: build/distributions/docbook-xsl-java-saxon-$TRAVIS_TAG.zip
+  on:
+    tags: true
+    all_branches: true
